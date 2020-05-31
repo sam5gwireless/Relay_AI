@@ -31,7 +31,7 @@ class ABG_Chan:
         BB1=node1.beam_book_size
         BB2=node2.beam_book_size
         N1=node1.Num_antennas
-        N2=node1.Num_antennas
+        N2=node2.Num_antennas
         index1=node1.current_beam_ID
         index2=node2.current_beam_ID
 
@@ -56,7 +56,7 @@ class ABG_Chan:
         #print(Phi_opt)
         #print(Phi_opt)
         si1=PI*sin(Phis1[index1]-Phi_opt)
-        si2=PI*sin(Phis1[index2]-Phi_opt-PI)
+        si2=PI*sin(Phis2[index2]-Phi_opt-PI)
         Filter1=(sin(N1*si1/2)+eps) /(N1*sin(si1/2)+eps)
         #print(Filter1)
         Filter2=(sin(N2*si2/2)+eps) /(N2*sin(si2/2)+eps)
@@ -64,13 +64,6 @@ class ABG_Chan:
 
         total_PL_dB=PL-10*log10(abs(Filter1*Filter2*N1*N2))
 
-        if math.isnan(total_PL_dB[0]):
-            print('nan value for channel loss')
-            print(node1.node_type)
-            print(node1.ID)
-            print(node2.node_type)
-            print(node2.ID)
-        
         return(total_PL_dB[0])
 
 def add_dBm(p1_dBm,p2_dBm):
@@ -87,7 +80,7 @@ class wireless_node:
         self.Num_antennas=1
         self.NF_dB=0
         self.Rx_sig_power_dBm_per_Hz=-174
-        self.Tx_TRP_dBm_per_Hz=0
+        self.Tx_TRP_dBm_per_Hz=-35
         self.Tx_noise_TRP_dBm_per_Hz=-174
         self.current_beam_ID=0
         self.ID=0
@@ -248,8 +241,7 @@ class Relay_net:
         for i in  range(len(self.Relays)):
             node=self.Relays[i]
             action=A[i]
-            
-                
+          
             assert action in range(1,8)
             donor=self.pairing_Donor[node][0]
 
@@ -263,9 +255,12 @@ class Relay_net:
             elif action==3:
                 donor.current_beam_ID+=1
                 donor.current_beam_ID=donor.current_beam_ID%donor.beam_book_size
+                
+                
             elif action==4:
                 donor.current_beam_ID-=1
                 donor.current_beam_ID=donor.current_beam_ID%donor.beam_book_size
+                
             elif action==5:
                 self.pairing_Donor[node]=(self.pairing_Donor[node][0],
                                           min(self.pairing_Donor[node][1]+1, self.Max_FW_gain[(donor,node)]))
@@ -279,22 +274,22 @@ def create_example_env():
     gNB1_1=wireless_node()
     gNB1_1.node_type='gNB'
     gNB1_1.coords_m=(0,0)
-    gNB1_1.beam_book_size=128
-    gNB1_1.Num_antennas=128
-    gNB1_1.Tx_TRP_dBm_per_Hz=-30
+    gNB1_1.beam_book_size=1
+    gNB1_1.Num_antennas=1
+    gNB1_1.Tx_TRP_dBm_per_Hz=-35
 
 
 
 
     Relay1_1=wireless_node()
     Relay1_1.node_type='Relay'
-    Relay1_1.coords_m=(-50,-50)
+    Relay1_1.coords_m=(50,-50)
     Relay1_1.beam_book_size=32
     Relay1_1.Num_antennas=16
     Relay1_1.Tx_TRP_dBm_per_Hz=-1000
     Donor1_1=wireless_node()
     Donor1_1.node_type='Donor'
-    Donor1_1.coords_m=(-50,-50)
+    Donor1_1.coords_m=(50,-50)
     Donor1_1.beam_book_size=64
     Donor1_1.Num_antennas=32
     Donor1_1.NF_dB=5
@@ -322,32 +317,32 @@ def create_example_env():
     UE1_1=wireless_node()
     UE1_1.node_type='UE'
     UE1_1.coords_m=(-100,80)
-    UE1_1.beam_book_size=4
-    UE1_1.Num_antennas=4
+    UE1_1.beam_book_size=1
+    UE1_1.Num_antennas=1
     UE1_1.Tx_TRP_dBm_per_Hz=-1000
     UE1_1.NF_dB=5
 
     UE2_1=wireless_node()
     UE2_1.node_type='UE'
     UE2_1.coords_m=(0,-45)
-    UE2_1.beam_book_size=4
-    UE2_1.Num_antennas=4
+    UE2_1.beam_book_size=1
+    UE2_1.Num_antennas=1
     UE2_1.Tx_TRP_dBm_per_Hz=-1000
     UE2_1.NF_dB=5
 
     UE3_1=wireless_node()
     UE3_1.node_type='UE'
     UE3_1.coords_m=(30,90)
-    UE3_1.beam_book_size=4
-    UE3_1.Num_antennas=4
+    UE3_1.beam_book_size=1
+    UE3_1.Num_antennas=1
     UE3_1.Tx_TRP_dBm_per_Hz=-1000
     UE3_1.NF_dB=5
 
     UE4_1=wireless_node()
     UE4_1.node_type='UE'
     UE4_1.coords_m=(-60,-35)
-    UE4_1.beam_book_size=4
-    UE4_1.Num_antennas=4
+    UE4_1.beam_book_size=1
+    UE4_1.Num_antennas=1
     UE4_1.Tx_TRP_dBm_per_Hz=-1000
     UE4_1.NF_dB=5
 
@@ -364,22 +359,22 @@ def create_example_env():
     gNB1_2=wireless_node()
     gNB1_2.node_type='gNB'
     gNB1_2.coords_m=(0,0)
-    gNB1_2.beam_book_size=128
-    gNB1_2.Num_antennas=128
-    gNB1_2.Tx_TRP_dBm_per_Hz=-30
+    gNB1_2.beam_book_size=1
+    gNB1_2.Num_antennas=1
+    gNB1_2.Tx_TRP_dBm_per_Hz=-35
 
 
 
 
     Relay1_2=wireless_node()
     Relay1_2.node_type='Relay'
-    Relay1_2.coords_m=(-50,-50)
+    Relay1_2.coords_m=(50,-50)
     Relay1_2.beam_book_size=32
     Relay1_2.Num_antennas=16
     Relay1_2.Tx_TRP_dBm_per_Hz=-1000
     Donor1_2=wireless_node()
     Donor1_2.node_type='Donor'
-    Donor1_2.coords_m=(-50,-50)
+    Donor1_2.coords_m=(50,-50)
     Donor1_2.beam_book_size=64
     Donor1_2.Num_antennas=32
     Donor1_2.NF_dB=5
@@ -407,32 +402,32 @@ def create_example_env():
     UE1_2=wireless_node()
     UE1_2.node_type='UE'
     UE1_2.coords_m=(-100,80)
-    UE1_2.beam_book_size=4
-    UE1_2.Num_antennas=4
+    UE1_2.beam_book_size=1
+    UE1_2.Num_antennas=1
     UE1_2.Tx_TRP_dBm_per_Hz=-1000
     UE1_2.NF_dB=5
 
     UE2_2=wireless_node()
     UE2_2.node_type='UE'
     UE2_2.coords_m=(0,-45)
-    UE2_2.beam_book_size=4
-    UE2_2.Num_antennas=4
+    UE2_2.beam_book_size=1
+    UE2_2.Num_antennas=1
     UE2_2.Tx_TRP_dBm_per_Hz=-1000
     UE2_2.NF_dB=5
 
     UE3_2=wireless_node()
     UE3_2.node_type='UE'
     UE3_2.coords_m=(30,90)
-    UE3_2.beam_book_size=4
-    UE3_2.Num_antennas=4
+    UE3_2.beam_book_size=1
+    UE3_2.Num_antennas=1
     UE3_2.Tx_TRP_dBm_per_Hz=-1000
     UE3_2.NF_dB=5
 
     UE4_2=wireless_node()
     UE4_2.node_type='UE'
     UE4_2.coords_m=(-60,-35)
-    UE4_2.beam_book_size=4
-    UE4_2.Num_antennas=4
+    UE4_2.beam_book_size=1
+    UE4_2.Num_antennas=1
     UE4_2.Tx_TRP_dBm_per_Hz=-1000
     UE4_2.NF_dB=5
 
