@@ -10,6 +10,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+def return_perumations(A,p):
+                    if p==1:
+                        S=[]
+                        for i in A:
+                            S.append ([i])
+                        return (S)
+                    else:
+                        S=return_perumations (A,p-1)
+                        ans=[]
+                        for l in S :
+                            for i in A:
+                                temp=l+[i]
+
+                                ans.append(temp)
+                        return (ans)
+
+
 class ABG_Chan:
     alpha=3.53
     betha=22.4
@@ -141,7 +158,7 @@ class Relay_net:
     def calculate_SNR (self):   
         #calculates the SNR of each node given the propagation weights and the gains
         
-        
+        eps=1e-20
         self.update_graph_weights()
         
         num_nodes=len(self.Nodes)
@@ -213,11 +230,14 @@ class Relay_net:
         R_Beams=[]
         Gains=[]
         State={}
+        
         for node in self.Nodes:
             
              if node.node_type=='UE':
-                    UE_Coords.append(node.coords_m)
+                    UE_Coords.append(node.coords_m[0])
+                    UE_Coords.append(node.coords_m[1])
                     UE_SNRs.append(node.SNR_dB)
+                    
             
         for node in self.Nodes:
             if node.node_type=='Donor':
@@ -230,9 +250,10 @@ class Relay_net:
         State={'UE_SNRs': UE_SNRs, 'UE_Coords': UE_Coords,
            'D_SNRs':D_SNRs, 'D_Beams': D_Beams, 
                'R_Beams': R_Beams, 'Gains': Gains}
+        S=State['UE_SNRs']+ State['UE_Coords']+ State['D_SNRs']+ State['D_Beams'] + State['R_Beams']+ State['Gains']
         Reward=self.calculate_reward()
         
-        return(State,Reward)
+        return(S,Reward)
         
     def apply_action(self, A):
         
@@ -267,7 +288,17 @@ class Relay_net:
             elif action==6:
                 self.pairing_Donor[node]=(self.pairing_Donor[node][0],
                                           max(self.pairing_Donor[node][1]-1,0))
-
+    def get_possible_action_space(self):
+           
+            A=range(1,8)
+            p=len(self.Relays)
+            
+            #print(p)
+            #all the permutations of k different actions for p nodes
+            return(return_perumations (A,p) )
+        
+    
+            
                 
 def create_example_env():
 
