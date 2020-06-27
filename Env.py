@@ -117,6 +117,7 @@ class Relay_net:
         self.channel=ABG_Chan()
         self.channel.Coherence_time=coherence_time
         self.channel.UE_mobility=mobility_factor
+        self.state=[]
         
     def insert_node(self,N):
         assert N.node_type in {'UE' ,'gNB'}
@@ -211,7 +212,7 @@ class Relay_net:
         self.update_graph_weights()
         self.calculate_SNR()
         R=np.mean([node.SNR_dB for node in self.Nodes if node.node_type=='UE' ])
-        return (R)
+        return (pow(10, 0.1*R))
     
     def update_state(self):
         for node in self.Nodes:
@@ -247,12 +248,15 @@ class Relay_net:
                 R_Beams.append(node.current_beam_ID)
                 Gains.append(self.pairing_Donor[node][1])
         
-        State={'UE_SNRs': UE_SNRs, 'UE_Coords': UE_Coords,
+        Observation={'UE_SNRs': UE_SNRs, 
+               'UE_Coords': UE_Coords,
            'D_SNRs':D_SNRs, 'D_Beams': D_Beams, 
                'R_Beams': R_Beams, 'Gains': Gains}
-        S=State['UE_SNRs']+ State['UE_Coords']+ State['D_SNRs']+ State['D_Beams'] + State['R_Beams']+ State['Gains']
-        Reward=self.calculate_reward()
         
+        #S=State['UE_SNRs']+ State['UE_Coords']+ State['D_SNRs']+ State['D_Beams'] + State['R_Beams']+ State['Gains']
+        S=Observation['D_Beams']+Observation['R_Beams']
+        Reward=self.calculate_reward()
+        self.state=S
         return(S,Reward)
         
     def apply_action(self, A):
@@ -281,24 +285,36 @@ class Relay_net:
             elif action==4:
                 donor.current_beam_ID-=1
                 donor.current_beam_ID=donor.current_beam_ID%donor.beam_book_size
-                
-            elif action==5:
-                self.pairing_Donor[node]=(self.pairing_Donor[node][0],
-                                          min(self.pairing_Donor[node][1]+1, self.Max_FW_gain[(donor,node)]))
-            elif action==6:
-                self.pairing_Donor[node]=(self.pairing_Donor[node][0],
-                                          max(self.pairing_Donor[node][1]-1,0))
+            
+            self.update_state()     
+#             elif action==5:
+#                 self.pairing_Donor[node]=(self.pairing_Donor[node][0],
+#                                           min(self.pairing_Donor[node][1]+1, self.Max_FW_gain[(donor,node)]))
+#             elif action==6:
+#                 self.pairing_Donor[node]=(self.pairing_Donor[node][0],
+#                                           max(self.pairing_Donor[node][1]-1,0))
     def get_possible_action_space(self):
            
-            A=range(1,8)
+            A=range(1,6)
             p=len(self.Relays)
             
             #print(p)
             #all the permutations of k different actions for p nodes
             return(return_perumations (A,p) )
         
-    
-            
+    def force_into_state(self, State):
+        self.state=State
+        cntr=0
+        for node in self.Nodes:
+            if node.node_type=='Donor':
+                node.current_beam_ID=State[cntr]
+                cntr+=1
+        for node in self.Nodes:
+            if node.node_type=='Relay':
+                node.current_beam_ID=State[cntr]
+                cntr+=1     
+             
+        
                 
 def create_example_env():
 
@@ -315,14 +331,14 @@ def create_example_env():
     Relay1_1=wireless_node()
     Relay1_1.node_type='Relay'
     Relay1_1.coords_m=(50,-50)
-    Relay1_1.beam_book_size=32
-    Relay1_1.Num_antennas=16
+    Relay1_1.beam_book_size=8
+    Relay1_1.Num_antennas=4
     Relay1_1.Tx_TRP_dBm_per_Hz=-1000
     Donor1_1=wireless_node()
     Donor1_1.node_type='Donor'
     Donor1_1.coords_m=(50,-50)
-    Donor1_1.beam_book_size=64
-    Donor1_1.Num_antennas=32
+    Donor1_1.beam_book_size=8
+    Donor1_1.Num_antennas=4
     Donor1_1.NF_dB=5
     Donor1_1.Tx_TRP_dBm_per_Hz=-1000
 
@@ -330,14 +346,14 @@ def create_example_env():
     Relay2_1=wireless_node()
     Relay2_1.node_type='Relay'
     Relay2_1.coords_m=(50,50)
-    Relay2_1.beam_book_size=32
-    Relay2_1.Num_antennas=16
+    Relay2_1.beam_book_size=8
+    Relay2_1.Num_antennas=4
     Relay2_1.Tx_TRP_dBm_per_Hz=-1000
     Donor2_1=wireless_node()
     Donor2_1.node_type='Donor'
     Donor2_1.coords_m=(50,50)
-    Donor2_1.beam_book_size=64
-    Donor2_1.Num_antennas=32
+    Donor2_1.beam_book_size=8
+    Donor2_1.Num_antennas=4
     Donor2_1.NF_dB=5
     Donor2_1.Tx_TRP_dBm_per_Hz=-1000
 
