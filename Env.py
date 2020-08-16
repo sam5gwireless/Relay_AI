@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import numpy as np
 from numpy import sin, cos, log10, arctan
 import numpy as np
@@ -479,7 +473,7 @@ def create_example_env():
     UE4_2.NF_dB=5
 
 
-    relay_net2=Relay_net(coherence_time=1e5, mobility_factor=0.5)
+    relay_net2=Relay_net(coherence_time=1e5, mobility_factor=0.2)
     relay_net2.insert_node(gNB1_2)
     relay_net2.insert_node(UE1_2)
     relay_net2.insert_node(UE2_2)
@@ -487,6 +481,85 @@ def create_example_env():
     relay_net2.insert_node(UE4_2)
     relay_net2.insert_repeater_node (Relay1_2, Donor1_2, 100,110)
     relay_net2.insert_repeater_node (Relay2_2, Donor2_2, 100,110)
-    
-    return (relay_net1, relay_net2)
 
+###########################################################################
+    gNB1_3=wireless_node()
+    gNB1_3.node_type='gNB'
+    gNB1_3.coords_m=(0,0)
+    gNB1_3.beam_book_size=1
+    gNB1_3.Num_antennas=1
+    gNB1_3.Tx_TRP_dBm_per_Hz=-35
+
+
+
+
+    Relay1_3=wireless_node()
+    Relay1_3.node_type='Relay'
+    Relay1_3.coords_m=(50,-50)
+    Relay1_3.beam_book_size=32
+    Relay1_3.Num_antennas=16
+    Relay1_3.Tx_TRP_dBm_per_Hz=-1000
+    Donor1_3=wireless_node()
+    Donor1_3.node_type='Donor'
+    Donor1_3.coords_m=(50,-50)
+    Donor1_3.beam_book_size=64
+    Donor1_3.Num_antennas=32
+    Donor1_3.NF_dB=5
+    Donor1_3.Tx_TRP_dBm_per_Hz=-1000
+
+
+    Relay2_3=wireless_node()
+    Relay2_3.node_type='Relay'
+    Relay2_3.coords_m=(50,50)
+    Relay2_3.beam_book_size=32
+    Relay2_3.Num_antennas=16
+    Relay2_3.Tx_TRP_dBm_per_Hz=-1000
+    Donor2_3=wireless_node()
+    Donor2_3.node_type='Donor'
+    Donor2_3.coords_m=(50,50)
+    Donor2_3.beam_book_size=64
+    Donor2_3.Num_antennas=32
+    Donor2_3.NF_dB=5
+    Donor2_3.Tx_TRP_dBm_per_Hz=-1000
+
+
+
+
+
+
+
+    UE2_3=wireless_node()
+    UE2_3.node_type='UE'
+    UE2_3.coords_m=(0,-45)
+    UE2_3.beam_book_size=1
+    UE2_3.Num_antennas=1
+    UE2_3.Tx_TRP_dBm_per_Hz=-1000
+    UE2_3.NF_dB=5
+
+    UE3_3=wireless_node()
+    UE3_3.node_type='UE'
+    UE3_3.coords_m=(30,90)
+    UE3_3.beam_book_size=1
+    UE3_3.Num_antennas=1
+    UE3_3.Tx_TRP_dBm_per_Hz=-1000
+    UE3_3.NF_dB=5
+
+    UE4_3=wireless_node()
+    UE4_3.node_type='UE'
+    UE4_3.coords_m=(-60,-35)
+    UE4_3.beam_book_size=1
+    UE4_3.Num_antennas=1
+    UE4_3.Tx_TRP_dBm_per_Hz=-1000
+    UE4_3.NF_dB=5
+
+
+    relay_net3=Relay_net(coherence_time=1e5, mobility_factor=0)
+    relay_net3.insert_node(gNB1_3)
+    #relay_net3.insert_node(UE1_2)
+    relay_net3.insert_node(UE2_3)
+    relay_net3.insert_node(UE3_3)
+    #relay_net3.insert_node(UE4_3)
+    relay_net3.insert_repeater_node (Relay1_3, Donor1_3, 100,110)
+    relay_net3.insert_repeater_node (Relay2_3, Donor2_3, 100,110)
+
+    return (relay_net1, relay_net2,relay_net3)
